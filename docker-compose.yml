@@ -1,0 +1,41 @@
+version: '3'
+services:
+  database:
+    image: postgres:14.2-alpine
+    environment:
+      POSTGRES_PASSWORD: example
+  redis: 
+    image: 'redis:latest'
+  service:
+    build: 
+      context: ./server 
+      dockerfile: Dockerfile.dev
+    volumes:
+      - /app/node_modules
+      - ./server:/app
+    environment:
+      - PGUSER=postgres
+      - PGHOST=database
+      - PGDATABASE=postgres
+      - POSTGRES_PASSWORD=POSTGRES_PASSWORD
+      - PGPORT=5432
+      - REDIS_HOST=redis
+      - REDI_PORT=6379
+  worker:
+    build:
+      context: ./worker
+      dockerfile: Dockerfile.dev
+    volumes:
+        - /app/node_modules
+        - ./worker:/app
+  client:
+    build:
+      context: ./client-typescript
+      dockerfile: Dockerfile.dev
+    volumes:
+        - /app/node_modules
+        - ./client-typescript:/app
+  nginx:
+    build:
+      context: ./nginx
+      dockerfile: Dockerfile.dev
